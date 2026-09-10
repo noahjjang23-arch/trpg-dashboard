@@ -1309,6 +1309,19 @@ textarea {
   z-index: 2200 !important;
 }
 
+/*
+ * 마스터/게임 화면은 overflow가 visible이라 sticky 기준이 뷰포트입니다.
+ * 그래서 상단 HUD(52px)를 피하려면 top: 52px 이 맞습니다.
+ *
+ * 반면 .player-screen 은 overflow-y: auto 라서 자기 자신이 스크롤 컨테이너가 됩니다.
+ * 이 경우 sticky 기준선이 이미 HUD 아래(#playerScreen의 상단)이므로,
+ * top: 52px 을 그대로 두면 HUD 높이를 두 번 빼서 헤더가 52px 아래로 밀려나고
+ * 본문(캐릭터 생성 패널)을 덮어버립니다. 여기서는 0이 맞습니다.
+ */
+#playerScreen>.topbar {
+  top: 0 !important;
+}
+
 /* 기존 v17 fixed 여백 충돌 제거 */
 .main-layout,
 #gameScreen .main-layout,

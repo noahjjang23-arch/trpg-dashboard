@@ -1,7 +1,7 @@
 import { damage, showToast } from "./combat.js";
 import { baseStats, makeId, normalize, normalizeForgeConfig, save } from "./main.js";
 import { appState, $, COMMON_STATS, STAT_LABELS, data } from "./constants_data.js";
-import { clearInputs, renderAll } from "./rendering.js";
+import { clearInputs, clearStats, readImage, readStats, renderAll } from "./rendering.js";
 
 export function rollCreationStats() {
   const limit = Math.max(1, Number(data.creation.rollLimit || 3));

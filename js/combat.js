@@ -1,4 +1,4 @@
-import { actorValue, addLog, attackTypeName, esc, findActor, jobTitle, openMainSceneShop, shopTypeName, typeName, worldEventName } from "./creation.js";
+import { actorValue, addLog, attackTypeName, esc, escAttr, findActor, getPercent, jobTitle, openMainSceneShop, renderPlayerPortal, shopTypeName, typeName, worldEventName } from "./creation.js";
 import { clearInputs, clearStats, pushScene, readImage, readStats, renderAll, renderList, renderMapView } from "./rendering.js";
 import { appState, $, COMMON_STATS, STAT_LABELS, data } from "./constants_data.js";
 import { init, makeId, normalize, save } from "./main.js";

@@ -1,6 +1,6 @@
 import { appState, $, COMMON_STATS, STAT_LABELS, data } from "./constants_data.js";
 import { makeId, save } from "./main.js";
-import { readImage } from "./rendering.js";
+import { readImage, renderAll } from "./rendering.js";
 import { showToast, screenEffect } from "./combat.js";
 import { addLog, esc, escAttr } from "./creation.js";
 
