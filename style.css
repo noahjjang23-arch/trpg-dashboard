@@ -1684,6 +1684,19 @@ textarea {
   pointer-events: none;
 }
 
+/* 분배할 포인트가 없거나 주사위를 굴리기 전이면 컨트롤을 비활성으로 보여줍니다.
+   (위 .creation-stat-btn 규칙이 cursor: pointer !important 라 여기서 되돌립니다) */
+.creation-stat-btn:disabled {
+  opacity: .4;
+  filter: grayscale(1);
+  cursor: not-allowed !important;
+}
+
+.creation-stat-input:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
 #playerMerchantHiddenBox {
   display: none !important;
 }

@@ -28,17 +28,32 @@ export function renderCreationStatsGrid() {
   if (!box) return;
   data.playerSession.creationStats ??= {};
   COMMON_STATS.forEach(s => data.playerSession.creationStats[s] ??= 0);
-  box.innerHTML = COMMON_STATS.map(stat => `
+  const roll = Number(data.playerSession.creationRoll || 0);
+  const remaining = Number(data.playerSession.creationRemaining || 0);
+
+  box.innerHTML = COMMON_STATS.map(stat => {
+    const value = Number(data.playerSession.creationStats[stat] || 0);
+    // 쓸 수 없는 버튼은 비활성으로 표시합니다.
+    // 예전에는 눌러도 아무 일이 없어 버튼이 고장난 것처럼 보였습니다.
+    const canAdd = roll > 0 && remaining > 0;
+    const canSub = value > 0;
+    return `
     <div class="creation-stat-row">
       <strong>${STAT_LABELS[stat]}</strong>
       <div class="stat-controls">
-        <button class="creation-stat-btn" data-creation-stat="${stat}" data-delta="-1">-</button>
-        <input class="creation-stat-input" type="number" min="0" data-creation-stat-input="${stat}" value="${data.playerSession.creationStats[stat] || 0}" />
-        <button class="creation-stat-btn" data-creation-stat="${stat}" data-delta="1">+</button>
+        <button class="creation-stat-btn" data-creation-stat="${stat}" data-delta="-1"${canSub ? "" : " disabled"}>-</button>
+        <input class="creation-stat-input" type="number" min="0" max="${value + remaining}" data-creation-stat-input="${stat}" value="${value}"${roll > 0 ? "" : " disabled"} />
+        <button class="creation-stat-btn" data-creation-stat="${stat}" data-delta="1"${canAdd ? "" : " disabled"}>+</button>
       </div>
-    </div>
-  `).join("");
-  if ($("remainingStatPoints")) $("remainingStatPoints").textContent = `남은 포인트: ${data.playerSession.creationRemaining || 0}`;
+    </div>`;
+  }).join("");
+
+  if ($("remainingStatPoints")) {
+    const hint = roll <= 0
+      ? " · 먼저 [초기 스탯 주사위]를 굴리세요"
+      : (remaining <= 0 ? " · 모두 분배했습니다" : "");
+    $("remainingStatPoints").textContent = `남은 포인트: ${remaining}${hint}`;
+  }
   if ($("creationRollResult")) $("creationRollResult").textContent = data.playerSession.creationRoll ? `스탯 포인트: ${data.playerSession.creationRoll}` : "스탯 포인트: -";
   if ($("creationRollCountView")) $("creationRollCountView").textContent = `남은 굴림: ${Math.max(0, Number(data.creation.rollLimit || 3) - Number(data.playerSession.creationRollsUsed || 0))} / ${data.creation.rollLimit || 3}`;
   if ($("classRollResult")) $("classRollResult").textContent = data.playerSession.classRoll ? `직업 주사위: ${data.playerSession.classRoll}` : "직업 주사위: -";
@@ -48,7 +63,12 @@ export function renderCreationStatsGrid() {
 export function changeCreationStat(stat, delta) {
   data.playerSession.creationStats ??= {};
   data.playerSession.creationStats[stat] ??= 0;
-  if (delta > 0 && data.playerSession.creationRemaining <= 0) return;
+  // 예전에는 여기서 조용히 return 해서 버튼이 고장난 것처럼 보였습니다.
+  // 이제는 왜 안 되는지 알려줍니다. (버튼 자체도 비활성 표시됩니다)
+  if (delta > 0) {
+    if (Number(data.playerSession.creationRoll || 0) <= 0) return showToast("먼저 [초기 스탯 주사위]를 굴려주세요.");
+    if (Number(data.playerSession.creationRemaining || 0) <= 0) return showToast("남은 포인트가 없습니다.");
+  }
   if (delta < 0 && data.playerSession.creationStats[stat] <= 0) return;
   data.playerSession.creationStats[stat] += delta;
   data.playerSession.creationRemaining -= delta;
@@ -57,17 +77,25 @@ export function changeCreationStat(stat, delta) {
 }
 
 export function setCreationStatValue(stat, value) {
+  // 예전에는 creationRoll > 0 일 때만 상한을 검사해서,
+  // 주사위를 굴리기 전에는 입력창에 아무 숫자나 넣어 스탯을 공짜로 올릴 수 있었습니다.
+  // 이제 +/- 버튼과 동일한 규칙을 항상 적용합니다. (굴리기 전이면 상한이 0)
   data.playerSession.creationStats ??= {};
-  const cleanValue = Math.max(0, Number(value || 0));
-  data.playerSession.creationStats[stat] = cleanValue;
-  if (Number(data.playerSession.creationRoll || 0) > 0) {
-    const used = COMMON_STATS.reduce((sum, s) => sum + Number(data.playerSession.creationStats?.[s] || 0), 0);
-    if (used > Number(data.playerSession.creationRoll || 0)) {
-      data.playerSession.creationStats[stat] = Math.max(0, cleanValue - (used - Number(data.playerSession.creationRoll || 0)));
-    }
-    const finalUsed = COMMON_STATS.reduce((sum, s) => sum + Number(data.playerSession.creationStats?.[s] || 0), 0);
-    data.playerSession.creationRemaining = Math.max(0, Number(data.playerSession.creationRoll || 0) - finalUsed);
+  COMMON_STATS.forEach(s => data.playerSession.creationStats[s] ??= 0);
+
+  const roll = Number(data.playerSession.creationRoll || 0);
+  const others = COMMON_STATS.reduce((sum, s) => s === stat ? sum : sum + Number(data.playerSession.creationStats[s] || 0), 0);
+  const max = Math.max(0, roll - others);
+  const requested = Math.max(0, Math.floor(Number(value) || 0));
+  const clamped = Math.min(requested, max);
+
+  data.playerSession.creationStats[stat] = clamped;
+  data.playerSession.creationRemaining = Math.max(0, roll - (others + clamped));
+
+  if (clamped < requested) {
+    showToast(roll > 0 ? `이 스탯에 넣을 수 있는 최대치는 ${max}입니다.` : "먼저 [초기 스탯 주사위]를 굴려주세요.");
   }
+
   save();
   renderCreationStatsGrid();
 }
