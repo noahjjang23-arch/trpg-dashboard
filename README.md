@@ -72,11 +72,11 @@ export const firebaseConfig = {
 **Firestore Database → 규칙** 탭에 이 저장소의 [`firestore.rules`](firestore.rules) 내용을 붙여넣고 게시합니다.
 로그인 없이 방 코드로만 참여하는 구조라서, `rooms` 컬렉션만 열어두고 나머지는 전부 막습니다.
 
-### 3-4. 승인된 도메인 추가
+> 참고: **Authentication → 승인된 도메인** 설정은 Firebase Authentication을 쓸 때만 적용됩니다.
+> 이 앱은 로그인 없이 Firestore만 사용하므로 따로 도메인을 등록할 필요가 없습니다.
+> 나중에 익명 로그인 등을 붙인다면 그때 GitHub Pages 주소를 추가하세요.
 
-**Authentication → Settings → 승인된 도메인** 에 GitHub Pages 주소(`<사용자명>.github.io`)를 추가합니다.
-
-### 3-5. 다시 배포
+### 3-4. 다시 배포
 
 `js/firebase_config.js` 를 수정했다면 커밋 후 push 하세요. 배포가 끝나면 멀티플레이가 켜집니다.
 
