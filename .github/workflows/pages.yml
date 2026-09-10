@@ -23,6 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          # 저장소에 Pages가 아직 켜져 있지 않으면 자동으로 활성화합니다.
+          enablement: true
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
