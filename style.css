@@ -1416,6 +1416,30 @@ textarea {
   background: #080604;
 }
 
+/*
+ * 전역 h2/h3/h4 는 margin-top: 0 이라, 플레이어 화면의 소제목들이
+ * 바로 위 박스(남은 굴림 / 남은 포인트)나 초상화에 그대로 달라붙었습니다.
+ * 아래 여백(기본 18.72px)만 남아 있어 제목이 "아래 내용"이 아니라
+ * "위 박스"에 속한 것처럼 읽히던 문제라, 위아래 여백을 뒤집습니다.
+ */
+.player-create-panel h3,
+#playerCurrentCharacterSheet h3 {
+  margin-top: 26px;
+  margin-bottom: 10px;
+}
+
+/* 카드 속 캐릭터 이름: 초상화와는 띄우고, 바로 아래 레벨/직업 줄과는 붙입니다. */
+.player-lobby-card h3,
+#playerCurrentCharacterSheet h2 {
+  margin-top: 14px;
+  margin-bottom: 4px;
+}
+
+.player-lobby-card p,
+#playerCurrentCharacterSheet>p.muted {
+  margin-top: 0;
+}
+
 .player-character-layout {
   display: grid;
   grid-template-columns: 330px minmax(500px, 1fr) 360px;
