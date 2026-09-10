@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// TRPG Master Dashboard - Firestore 보안 규칙
+//
+// 이 앱은 로그인 없이 "방 코드"만으로 참여하는 구조입니다.
+// 따라서 rooms/{roomId} 문서는 누구나 읽고 쓸 수 있어야 합니다.
+// 대신 아래 제한을 둡니다.
+//   - rooms 컬렉션 외의 경로는 전부 차단
+//   - 방 코드는 6자리(대문자+숫자)만 허용 → 무작위로 남의 방을 찾기 어렵게
+//   - 문서 크기 1MB 제한은 Firestore가 자체적으로 적용
+//
+// 비공개로 운영하고 싶다면 Firebase Authentication(익명 로그인)을 켠 뒤
+// allow read, write: if request.auth != null; 형태로 바꾸세요.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /rooms/{roomId} {
+      allow read, write: if roomId.matches('^[A-Z0-9]{6}$');
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
